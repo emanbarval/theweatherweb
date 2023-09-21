@@ -1,51 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import './App.css';
+import SelectApp from './SelectApp';
 
 function WeatherApp() {
-  const [city, setCity] = useState('');
   const [weatherData, setWeatherData] = useState(null);
-  const apiKey = 'TU_CLAVE_DE_API';
-  
-  async function getWeatherData() {
-    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
 
+  const handleSubmit = async (selectedCity) => {
     try {
-      const response = await fetch(apiUrl);
+      const response = await fetch(`http://localhost:3000/weather?city=${selectedCity}`);
       const data = await response.json();
       setWeatherData(data);
     } catch (error) {
-      console.log('Error al obtener los datos del clima:', error);
+      console.error(error);
     }
-  }
-
-  useEffect(() => {
-    getWeatherData();
-  }, []);
-
-  const handleSearch = () => {
-    getWeatherData();
   };
 
   return (
-    <div>
-      <input
-        type="text"
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
-        placeholder="Ingrese una ciudad"
-      />
-      <button onClick={handleSearch}>Buscar</button>
-
-      <h1>Web del Clima</h1>
-
-      {weatherData ? (
-        <div>
+    <div className="container">
+      <h1>Weather App</h1>
+      <SelectApp onSubmit={handleSubmit} />
+      {weatherData && (
+        <div className="weather-info">
           <h2>{weatherData.name}</h2>
-          <p>Temperatura: {weatherData.main.temp} °C</p>
-          <p>Humedad: {weatherData.main.humidity}%</p>
-          <p>Descripción: {weatherData.weather[0].description}</p>
+          <div className="weather-icon" style={{ background: `url('http://openweathermap.org/img/wn/${weatherData.weather[0].icon}.png') lightblue no-repeat`, backgroundSize: '100%' }}></div>
+          <p>Temperature: {weatherData.main.temp}°C</p>
+          <p>Humidity: {weatherData.main.humidity}%</p>
+          <p>Description: {weatherData.weather[0].description}</p>
         </div>
-      ) : (
-        <p>Cargando datos del clima...</p>
       )}
     </div>
   );
