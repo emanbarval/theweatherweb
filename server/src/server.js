@@ -1,28 +1,34 @@
 const express = require('express');
+//const fetch = require('node-fetch');
+
 const app = express();
+const port = process.env.PORT || 3000;
+const cors = require('cors');
+
+app.use(cors({ origin: 'http://localhost:3001' }));
 
 // Carga las variables de entorno desde el archivo .env
 require('dotenv').config();
 
-// Ruta para obtener los datos del clima
 app.get('/weather', async (req, res) => {
   try {
-    const apiKey = process.env.OPENWEATHERMAP_API_KEY;
-    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=Madrid&appid=${apiKey}`;
+    const city = req.query.city;
+    const apiKey = process.env.OPENWEATHERMAP_API_KEY; // Reemplaza con tu propia API key de openweathermap
 
-    const response = await fetch(apiUrl);
+    const { default: fetch } = await import('node-fetch');
+    console.log(city)
+    console.log(apiKey)
+
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`);
     const data = await response.json();
-
-    // Devuelve los datos del clima al cliente
+    console.log(data)
     res.json(data);
   } catch (error) {
-    console.log('Error al obtener los datos del clima:', error);
-    res.status(500).json({ error: 'Error al obtener los datos del clima' });
+    console.error(error);
+    res.status(500).json({ error: 'Ocurrió un error' });
   }
 });
 
-// Inicia el servidor
-const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Servidor en ejecución en el puerto ${port}`);
+  console.log(`Servidor Node.js escuchando en http://localhost:${port}`);
 });
